@@ -19,6 +19,20 @@
 
 ## Свой минимальный мир
 
+```
+# Создайте рабочее пространство (если нет)
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
+
+# Создайте пакет my_robot_gazebo
+ros2 pkg create --build-type ament_cmake my_robot_gazebo
+
+cd ~/ros2_ws/src/my_robot_gazebo
+mkdir -p worlds
+
+# Создайте и отредактируйте файл
+nano ~/ros2_ws/src/my_robot_gazebo/worlds/empty.sdf
+```
 Файл [worlds/empty.sdf](<../ros2_ws/src/my_robot_gazebo/worlds/empty.sdf>):
 
 ```xml
@@ -43,12 +57,94 @@
   </world>
 </sdf>
 ```
+#### Давайте для примера возьмем файл с голубым облачным фоном:
+```
+# Создайте и отредактируйте файл
+nano ~/ros2_ws/src/my_robot_gazebo/worlds/blue.sdf
+```
+blue.sdf:
+```xml
+<?xml version="1.0"?>
+<sdf version="1.10">
+  <world name="empty">
+    <scene>
+      <sky>
+        <time>12</time>
+        <cloud_speed>0.5</cloud_speed>
+        <cloud_ambient>0.2 0.2 0.3</cloud_ambient>
+      </sky>
+      <grid>true</grid>
+    </scene>
 
-Запускаем напрямую (без launch):
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu"/>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.5 -1</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>
+```
+```
+# oбновите CMakeLists.txt
+nano ~/ros2_ws/src/my_robot_gazebo/CMakeLists.txt
+
+#Добавьте в конец файла (до ament_package()):
+
+install(DIRECTORY worlds
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# соберите пакет
+cd ~/ros2_ws
+colcon build --packages-select my_robot_gazebo
+source install/setup.bash
+```
+Запускаем напрямую (без launch) ***(флаг LIBGL_ALWAYS_SOFTWARE=1 при необходимости)***:
 
 ```bash
 gz sim -r -v 3 \
-  $(ros2 pkg prefix my_robot_gazebo)/share/my_robot_gazebo/worlds/empty.sdf
+  $(ros2 pkg prefix my_robot_gazebo)/share/my_robot_gazebo/worlds/{empty/blue}.sdf
 ```
 
 Флаг `-r` - сразу запустить симуляцию (не на паузе). `-v 3` - умеренный лог.
@@ -82,7 +178,7 @@ ros2 launch my_robot_gazebo gazebo.launch.py world:=obstacles.sdf
 
 ### Практика: подвинуть модель сервисом
 
-Запустите `obstacles.sdf` и в другом терминале:
+Запустите `obstacles.sdf` ([worlds/obstacles.sdf](<../ros2_ws/src/my_robot_gazebo/worlds/obstacles.sdf>)) в другом терминале:
 
 ```bash
 gz service -s /world/obstacles/set_pose \
