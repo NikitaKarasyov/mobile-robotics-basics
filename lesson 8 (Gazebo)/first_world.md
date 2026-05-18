@@ -143,8 +143,9 @@ source install/setup.bash
 Запускаем напрямую (без launch) ***(флаг LIBGL_ALWAYS_SOFTWARE=1 при необходимости)***:
 
 ```bash
-gz sim -r -v 3 \
-  $(ros2 pkg prefix my_robot_gazebo)/share/my_robot_gazebo/worlds/{empty/blue}.sdf
+gz sim -r -v 3 $(ros2 pkg prefix my_robot_gazebo)/share/my_robot_gazebo/worlds/empty.sdf
+# или
+gz sim -r -v 3 $(ros2 pkg prefix my_robot_gazebo)/share/my_robot_gazebo/worlds/blue.sdf
 ```
 
 Флаг `-r` - сразу запустить симуляцию (не на паузе). `-v 3` - умеренный лог.
