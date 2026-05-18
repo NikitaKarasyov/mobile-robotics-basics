@@ -19,12 +19,13 @@ URDF из [урока 5](<../lesson 5 (URDF and XACRO)/understanding_URDF.md>) �
 
 ```xml
 <gazebo>
-  <plugin filename="gz-sim-diff-drive-system"
-          name="gz::sim::systems::DiffDrive">
-    <left_joint>left_wheel_joint</left_joint>
-    <right_joint>right_wheel_joint</right_joint>
-    <wheel_separation>0.24</wheel_separation>
-    <wheel_radius>0.05</wheel_radius>
+  <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+    <left_joint>left_front_wheel_joint</left_joint>
+    <right_joint>right_front_wheel_joint</right_joint>
+    
+    <wheel_separation>0.44</wheel_separation> 
+    <wheel_radius>0.035</wheel_radius>
+    
     <odom_publish_frequency>30</odom_publish_frequency>
     <topic>cmd_vel</topic>
     <odom_topic>odom</odom_topic>
