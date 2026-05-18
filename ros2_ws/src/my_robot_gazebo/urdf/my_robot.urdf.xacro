@@ -1,26 +1,7 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="r2d2_gazebo_wrapper">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="r2d2_gazebo">
 
   <xacro:include filename="$(find my_robot_gazebo)/urdf/05-visual.urdf" />
-
-  <link name="base_footprint"/>
-  <joint name="base_footprint_to_base" type="fixed">
-    <parent link="base_footprint"/>
-    <child link="base_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-  </joint>
-
-  <gazebo reference="base_link">
-    <collision>
-      <geometry>
-        <cylinder length="0.6" radius="0.2"/>
-      </geometry>
-    </collision>
-    <inertial>
-      <mass value="10.0"/>
-      <inertia ixx="0.4" ixy="0.0" ixz="0.0" iyy="0.4" iyz="0.0" izz="0.2"/>
-    </inertial>
-  </gazebo>
 
   <gazebo>
     <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
@@ -28,8 +9,8 @@
       <left_joint>left_front_wheel_joint</left_joint>
       <right_joint>right_front_wheel_joint</right_joint>
       
-      <wheel_separation>0.44</wheel_separation>
-      <wheel_radius>0.035</wheel_radius>
+      <wheel_separation>0.44</wheel_separation> 
+      <wheel_radius>0.035</wheel_radius>        
       
       <odom_publish_frequency>30</odom_publish_frequency>
       
@@ -37,7 +18,7 @@
       <odom_topic>odom</odom_topic>
       <tf_topic>tf</tf_topic>
       <frame_id>odom</frame_id>
-      <child_frame_id>base_footprint</child_frame_id>
+      <child_frame_id>base_link</child_frame_id>
     </plugin>
   </gazebo>
 
