@@ -47,11 +47,13 @@ URDF из [урока 5](<../lesson 5 (URDF and XACRO)/understanding_URDF.md>) �
 
 ```xml
 <gazebo>
-  <plugin filename="gz-sim-joint-state-publisher-system"
-          name="gz::sim::systems::JointStatePublisher">
+  <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
     <topic>joint_states</topic>
-    <joint_name>left_wheel_joint</joint_name>
-    <joint_name>right_wheel_joint</joint_name>
+
+    <joint_name>left_front_wheel_joint</joint_name>
+    <joint_name>left_back_wheel_joint</joint_name>
+    <joint_name>right_front_wheel_joint</joint_name>
+    <joint_name>right_back_wheel_joint</joint_name>
   </plugin>
 </gazebo>
 ```
