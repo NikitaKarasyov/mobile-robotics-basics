@@ -6,6 +6,28 @@
 
 URDF из [урока 5](<../lesson 5 (URDF and XACRO)/understanding_URDF.md>) описывает кинематику и инерцию. Чтобы Gazebo "видел" робота как управляемый, в URDF добавляются блоки `<gazebo>`:
 
+только нужно добавить физику объекта в код, gazebo не может работать с объектом без физики
+
+ <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.6" radius="0.2"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder length="0.6" radius="0.2"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="10.0"/>
+      <inertia ixx="0.4" ixy="0.0" ixz="0.0" iyy="0.4" iyz="0.0" izz="0.2"/>
+    </inertial>
+</link>
+
+
 | Блок | Что описывает |
 |---|---|
 | `<gazebo>` без `reference` | Системные плагины модели (diff_drive, joint_state_publisher, ...) |
