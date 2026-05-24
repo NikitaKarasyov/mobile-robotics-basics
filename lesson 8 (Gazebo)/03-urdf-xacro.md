@@ -345,11 +345,112 @@ def generate_launch_description():
 
 Обратите внимание — Xacro запускается **в момент запуска launch**, на лету. Не нужно отдельно конвертировать `.xacro` → `.urdf`.
 
+## Расчёт центра масс из URDF
+
+Когда модель собрана, часто нужно знать положение **центра масс (ЦМ)** всего робота. Это важно для:
+
+* устойчивости робота на наклонных поверхностях;
+* расчёта нагрузки на колёса и подвеску;
+* проектирования контроллеров балансировки;
+* проверки правильности расположения сенсоров и батареи.
+
+### Формула
+
+ЦМ системы из нескольких тел — это взвешенное среднее их положений:
+
+```
+x_цм = Σ(mᵢ · xᵢ) / Σmᵢ
+```
+
+Где `mᵢ` — масса i-го линка, `xᵢ` — координата его центра. Тяжёлые линки «притягивают» ЦМ к себе. Формула применяется отдельно для каждой координаты (X, Y, Z).
+
+### Координаты линков
+
+В URDF каждый линк имеет позицию относительно родителя (тег `<origin>` в суставе). Чтобы получить **абсолютную** координату линка в системе робота, нужно пройти по дереву суставов от корня и сложить смещения.
+
+Пример для R2D2 — путь до `right_front_wheel`:
+
+```
+base_footprint (z=0)
+    ↓ base_footprint_joint: +0.1
+base_link (z=0.1)
+    ↓ base_to_right_leg: +0.25
+right_leg (z=0.35)
+    ↓ right_base_joint: -0.6
+right_base (z=-0.25)
+    ↓ wheel_joint: -0.085
+right_front_wheel (z=-0.335)
+```
+
+### Скрипт расчёта
+
+```python
+import numpy as np
+
+# Цепочка суставов из URDF
+joints = {
+    'base_footprint_joint': {'parent': 'base_footprint', 'child': 'base_link',         'z': 0.1},
+    'base_to_right_leg':    {'parent': 'base_link',      'child': 'right_leg',         'z': 0.25},
+    'base_to_left_leg':     {'parent': 'base_link',      'child': 'left_leg',          'z': 0.25},
+    'right_base_joint':     {'parent': 'right_leg',      'child': 'right_base',        'z': -0.6},
+    'left_base_joint':      {'parent': 'left_leg',       'child': 'left_base',         'z': -0.6},
+    'right_wheel_joint':    {'parent': 'right_base',     'child': 'right_front_wheel', 'z': -0.085},
+    'left_wheel_joint':     {'parent': 'left_base',      'child': 'left_front_wheel',  'z': -0.085},
+    'head_swivel':          {'parent': 'base_link',      'child': 'head',              'z': 0.3},
+}
+
+# Массы линков из URDF
+masses = {
+    'base_link': 5.0,
+    'right_leg': 0.5,
+    'left_leg':  0.5,
+    'right_base': 0.3,
+    'left_base':  0.3,
+    'right_front_wheel': 0.5,
+    'left_front_wheel':  0.5,
+    'head': 1.0,
+}
+
+# Идём по дереву и считаем абсолютные z
+z_abs = {'base_footprint': 0.0}
+changed = True
+while changed:
+    changed = False
+    for j, data in joints.items():
+        if data['parent'] in z_abs and data['child'] not in z_abs:
+            z_abs[data['child']] = z_abs[data['parent']] + data['z']
+            changed = True
+
+# Применяем формулу ЦМ
+total_m = sum(masses.values())
+total_mz = sum(masses[link] * z_abs[link] for link in masses)
+z_cm = total_mz / total_m
+
+print(f"ЦМ робота находится на высоте z = {z_cm:.3f} м")
+```
+
+### Учёт ориентации сустава
+
+Скрипт выше упрощённый — учитывает только координату z и не обрабатывает повороты (`rpy` в origin). Для роботов где линки развёрнуты под углом, нужно применять преобразования вращения через 4×4 матрицы. Это стандартная задача из tf2 — пакеты ROS делают это автоматически.
+
+Для большинства простых роботов с ортогональной геометрией скрипта выше достаточно.
+
+### Альтернатива — через Gazebo
+
+Gazebo сам считает ЦМ при загрузке модели. Включить отображение в GUI:
+
+```
+View → Center of Mass
+```
+
+Появится маркер показывающий где находится ЦМ всей сборки. Удобно для быстрой проверки.
+
 ## Контрольные проверки
 
 * `ros2 run xacro xacro r2d2.urdf.xacro` выводит валидный URDF без ошибок.
 * После запуска launch с `robot_state_publisher` команда `ros2 topic echo /robot_description` показывает развёрнутый URDF.
 * `ros2 run tf2_tools view_frames` строит граф фреймов: `base_footprint → base_link → head, left_leg, right_leg → ...`.
+* Скрипт расчёта ЦМ даёт значение совпадающее с маркером в Gazebo (`View → Center of Mass`).
 
 ## Дальше
 
