@@ -357,41 +357,9 @@ install(DIRECTORY urdf
 
 `robot_state_publisher` берёт URDF и углы суставов из `/joint_states`, вычисляет TF дерево и публикует его в `/tf`. Без него RViz не знает где находятся колёса относительно корпуса.
 
-В launch файле:
+В launch файле ему передаётся результат команды `xacro r2d2.urdf.xacro` как строка через параметр `robot_description`. Xacro запускается **в момент запуска launch**, на лету — не нужно отдельно конвертировать `.xacro` → `.urdf`.
 
-```python
-from launch import LaunchDescription
-from launch.substitutions import PathJoinSubstitution, Command, FindExecutable
-from launch_ros.substitutions import FindPackageShare
-from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
-
-
-def generate_launch_description():
-    # Command(['xacro', ' ', 'путь_к_файлу']) — запускает xacro как команду
-    # и передаёт результат как строку в robot_description
-    robot_description = ParameterValue(
-        Command([
-            FindExecutable(name='xacro'), ' ',
-            PathJoinSubstitution([
-                FindPackageShare('my_robot_gazebo'),
-                'urdf', 'r2d2.urdf.xacro'
-            ])
-        ]),
-        value_type=str
-    )
-
-    rsp = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        parameters=[{'robot_description': robot_description}],
-        output='screen'
-    )
-
-    return LaunchDescription([rsp])
-```
-
-Xacro запускается **в момент запуска launch**, на лету. Не нужно отдельно конвертировать `.xacro` → `.urdf` — это происходит автоматически.
+Как именно это выглядит в коде — увидим в следующей статье где `robot_state_publisher` запускается вместе с Gazebo и мостом в одном launch файле.
 
 ## Расчёт центра масс из URDF
 
