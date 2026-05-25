@@ -255,29 +255,6 @@ ros2 topic echo /odom --field pose.pose.position
 
 Поза должна меняться.
 
-## RViz с мостом
-
-Теперь можно показать робота в RViz, который читает только из ROS 2:
-
-```bash
-rviz2
-```
-
-В RViz:
-* **Fixed Frame** — `odom`
-* Добавить **RobotModel** — описание из топика `/robot_description`
-* Добавить **TF** — увидите все фреймы
-* Добавить **Odometry** — траекторию робота
-
-При публикации `cmd_vel` робот двигается в Gazebo, и одновременно — модель в RViz.
-
-## Контрольные проверки
-
-* `ros2 topic list` показывает `/cmd_vel`, `/odom`, `/tf`, `/clock`, `/joint_states`.
-* `ros2 topic hz /clock` показывает примерно 1000 Гц (зависит от `max_step_size` в SDF).
-* `ros2 topic pub /cmd_vel ...` заставляет робота двигаться в Gazebo.
-* В RViz при `Fixed Frame = odom` модель робота отображается и движется.
-
 ## Дальше
 
 В следующей статье — добавляем сенсоры IMU и лидар. Они тоже работают через плагины и мостятся в ROS 2 как `/imu` и `/scan`.
