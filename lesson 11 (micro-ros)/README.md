@@ -1,13 +1,33 @@
 # Урок 11. micro-ROS
 
-Раздел зарезервирован для материалов по micro-ROS.
+Цель урока - разобраться, как встроить микроконтроллер в ROS 2 систему через micro-ROS: поднять Agent, описать ROS-сущности на firmware, проверить топики и довести данные до одометрии, SLAM или Nav2. Практический пример основан на учебном ESP32-CAM стеке мобильного робота.
 
-Планируемые темы:
+## Материалы
 
-- архитектура micro-ROS: agent, client, transport;
-- установка micro-ROS Agent для ROS 2 Jazzy;
-- первый publisher на микроконтроллере;
-- обмен данными между микроконтроллером и ROS 2 graph;
-- ограничения памяти, QoS и диагностика.
+| Статья | Результат |
+|---|---|
+| [micro-ROS в стеке ESP32-CAM мобильного робота](micro_ros_esp32_stack.md) | Запущен micro-ROS Agent, спроектированы топики микроконтроллера, разобран ROS-граф и подготовлен путь от firmware до SLAM/Nav2 |
 
-Перед этим разделом рекомендуется пройти уроки по [нодам и топикам](<../lesson 2 (nodes and topics)/README.md>), [сервисам и действиям](<../lesson 3 (actions and services)/README.md>) и [rosdep](<../lesson 2 (nodes and topics)/rosdep.md>).
+## Что нужно знать заранее
+
+Перед уроком рекомендуется пройти:
+
+- [ноды и топики](<../lesson 2 (nodes and topics)/README.md>);
+- [сервисы и действия](<../lesson 3 (actions and services)/README.md>);
+- [launch-файлы и параметры](<../lesson 4 (launches and parameters)/README.md>);
+- [tf2](<../lesson 7 (TF2)/README.md>);
+- [TurtleBot3 simulation](<../lesson 10 (turtlebot3 sim)/README.md>) или другой материал про мобильного робота в ROS 2.
+
+Для практики понадобится ROS 2 Jazzy. Реальный ESP32-CAM робот полезен для аппаратной проверки, но не обязателен: архитектуру, ROS-контракт, Agent, transport и диагностику можно разобрать без конкретного железа.
+
+## После урока
+
+Студент должен уметь:
+
+- объяснить роли micro-ROS Client, micro-ROS Agent, XRCE-DDS и ROS 2 graph;
+- поднять agent по UDP и проверить подключение клиента через `ros2 node list` и `ros2 topic list`;
+- читать и интерпретировать топики `cmd_vel`, `joint_states`, `imu/data_raw`, `scan`, `odom`;
+- объяснить, зачем на хосте нужны restamp-узлы для сообщений с микроконтроллера;
+- безопасно проверить движение дифференциального робота и подготовить данные для SLAM/Nav2.
+
+Переходите к статье [micro-ROS в стеке ESP32-CAM мобильного робота](micro_ros_esp32_stack.md).
